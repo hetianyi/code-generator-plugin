@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--#MvcTemplate#-->
+<!DOCTYPE mapper PUBLIC "-//mapper.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.hetianyi.plugin.sample.mapper.ExampleMapper">
+
+    <select id="countExamples"
+            parameterType="com.github.hetianyi.boot.ready.model.http.Pageable"
+            resultType="java.lang.Integer">
+        select
+        count(*)
+        from t_example
+        where 1=1
+        <!--查询条件-->
+        <!--<if test="id != null">
+            and id = #{id}
+        </if>-->
+        <!--<if test="username != null and username != ''">
+            and username = #{username}
+        </if>-->
+        <if test="createdTimeStart != null">
+            and created_time &gt;= #{createdTimeStart}
+        </if>
+        <if test="createdTimeEnd != null">
+            and created_time &lt;= #{createdTimeEnd}
+        </if>
+        <if test="updatedTimeStart != null">
+            and updated_time &gt;= #{updatedTimeStart}
+        </if>
+        <if test="updatedTimeEnd != null">
+            and updated_time &lt;= #{updatedTimeEnd}
+        </if>
+    </select>
+
+    <select id="listExamples"
+            parameterType="com.github.hetianyi.boot.ready.model.http.Pageable"
+            resultType="com.github.hetianyi.plugin.sample.model.po.ExamplePO">
+        select
+        /* #allFieldsStart# */id, username, nickname, created_time, updated_time/* #allFieldsEnd# */
+        from t_example
+        where 1=1
+        <if test="id != null">
+            and id = #{id}
+        </if>
+        <!--<if test="username != null and username != ''">
+            and username = #{username}
+        </if>-->
+        <if test="createdTimeStart != null">
+            and created_time &gt;= #{createdTimeStart}
+        </if>
+        <if test="createdTimeEnd != null">
+            and created_time &lt;= #{createdTimeEnd}
+        </if>
+        <if test="updatedTimeStart != null">
+            and updated_time &gt;= #{updatedTimeStart}
+        </if>
+        <if test="updatedTimeEnd != null">
+            and updated_time &lt;= #{updatedTimeEnd}
+        </if>
+
+        <choose>
+            <when test="orderByField != null and orderByField != ''">order by ${orderByField}</when>
+            <otherwise>order by /* #idFieldStart# */id/* #idFieldEnd# */</otherwise>
+        </choose>
+        <if test="orderByField != null and orderByField != ''">
+            <choose>
+                <when test="descending != null and !descending">asc</when>
+                <otherwise>desc</otherwise>
+            </choose>
+        </if>
+        <if test="page != null and pageSize != null">
+            limit ${@Integer@valueOf((page-1)*pageSize)},#{pageSize}
+        </if>
+    </select>
+</mapper>
