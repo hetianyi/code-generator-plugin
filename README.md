@@ -20,7 +20,7 @@
 <plugin>
 	<groupId>com.github.hetianyi</groupId>
 	<artifactId>code-generator-plugin</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<configuration>
 		<!-- MySQL数据库配置信息 -->
 		<database>
@@ -224,7 +224,6 @@ mvn code-generator:generate-pojo
 ```java
 // 在类上添加 @Slf4j 注解
 public class Slf4jFeature extends CustomFeature {
-
     public Slf4jFeature() {
         // 在标记点：CLASS_START的前面插入注解
 		// 并添加依赖
@@ -243,10 +242,6 @@ public class ExcludeIdAndTimeFieldFeature implements ExcludeField {
 	@Override
 	public Set<String> getExcludeFields(TableDefinition tabDef) {
 		return ImmutableSet.of("id", "created_time", "updated_time");
-	}
-
-	@Override
-	public void apply(ClassGenerator generator) {
 	}
 }
 ```
@@ -282,10 +277,6 @@ public class AddTimeRangeFieldFeature implements AddFieldFeature {
         }
         return result;
     }
-
-    @Override
-    public void apply(ClassGenerator generator) {
-    }
 }
 ```
 
@@ -306,7 +297,7 @@ public class AddTimeRangeFieldFeature implements AddFieldFeature {
 <plugin>
 	<groupId>com.github.hetianyi</groupId>
 	<artifactId>code-generator-plugin</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<configuration>
 		<!-- MySQL数据库配置信息 -->
 		<database>
