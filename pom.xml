@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>code-generator-plugin</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>maven-plugin</packaging>
     <description>Java代码生成插件</description>
 
@@ -34,7 +34,7 @@
         <connection>scm:git:git@github.com:hetianyi/code-generator-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:hetianyi/code-generator-plugin.git</developerConnection>
         <url>git@github.com:hetianyi/code-generator-plugin.git</url>
-        <tag>HEAD</tag>
+        <tag>code-generator-plugin-1.0.1</tag>
     </scm>
 
     <properties>
