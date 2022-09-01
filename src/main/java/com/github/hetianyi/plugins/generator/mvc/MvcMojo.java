@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import cn.hutool.core.io.FileUtil;
 import com.github.hetianyi.boot.ready.common.util.StringUtil;
@@ -131,11 +132,15 @@ public class MvcMojo extends BaseMojo {
                                              .replaceAll(TemplateConfig.MVC_MAPPER_ID_FIELD_MARKER,
                                                          null == idColumn ? "`id`" : "`" + idColumn.getName() + "`");
 
-
-            templateContent = templateContent.replace("examples", InflectorUtil.getInstance().pluralize(lowerObjectName))
-                                             .replace("Examples", InflectorUtil.getInstance().pluralize(upperObjectName))
+            String tempTabName = UUID.randomUUID().toString();
+            templateContent = templateContent.replace("t_example", tempTabName)
+                                             .replace("examples",
+                                                      InflectorUtil.getInstance().pluralize(lowerObjectName))
+                                             .replace("Examples",
+                                                      InflectorUtil.getInstance().pluralize(upperObjectName))
                                              .replace("Example", upperObjectName)
                                              .replace("example", lowerObjectName)
+                                             .replace(tempTabName, generator.getTabDef().getName())
                                              .replace("示例", entityName);
 
             File targetFile = new File(templateFileDir, copyFileName);
