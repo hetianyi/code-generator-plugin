@@ -166,7 +166,7 @@
 			</profile>
 			<profile>
 				<name>template</name>
-				<mvcTemplateDir>./src/main</mvcTemplateDir>
+				<templateDir>./src/main</templateDir>
 				<includeTables>
 					<!--<value>t_user</value>-->
 				</includeTables>

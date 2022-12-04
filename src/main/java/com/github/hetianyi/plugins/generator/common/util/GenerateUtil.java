@@ -106,7 +106,7 @@ public class GenerateUtil {
             resultMap.put(generator.getClassName(), generator);
         }
         //System.out.println(Const.GSON.toJson(tabDefs));
-        if (StringUtil.isNullOrEmptyTrimed(currentProfile.get().getMvcTemplateDir())) {
+        if (StringUtil.isNullOrEmptyTrimed(currentProfile.get().getTemplateDir())) {
             createPackageDir();
         }
         return resultMap;

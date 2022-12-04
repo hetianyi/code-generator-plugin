@@ -280,6 +280,36 @@ public class AddTimeRangeFieldFeature implements AddFieldFeature {
 }
 ```
 
+示例4：
+```java
+// 自定义数据库类型映射Java类型
+@Slf4j
+public class LocalDateTimeFeature implements TypeMappingFeature {
+	@Override
+	public Pair getType(String dbTypeName) {
+		if ("datetime".equalsIgnoreCase(dbTypeName)) {
+			return Pair.builder().javaTypeName(LocalDateTime.class.getSimpleName()).importClass(LocalDateTime.class.getName()).build();
+		}
+		return TypeMappingFeature.super.getType(dbTypeName);
+	}
+}
+```
+
+示例5：
+```java
+// 自定义数据库类型映射Java类型
+@Slf4j
+public class LocalDateTimeFeature implements TypeMappingFeature {
+	@Override
+	public Pair getType(String dbTypeName) {
+		if ("datetime".equalsIgnoreCase(dbTypeName)) {
+			return Pair.builder().javaTypeName(LocalDateTime.class.getSimpleName()).importClass(LocalDateTime.class.getName()).build();
+		}
+		return TypeMappingFeature.super.getType(dbTypeName);
+	}
+}
+```
+
 **标记点类型参考**：
 ```com.github.hetianyi.plugins.generator.pojo.generator.SlotType```
 
@@ -318,7 +348,7 @@ public class AddTimeRangeFieldFeature implements AddFieldFeature {
 				<!-- profile名称 -->
 				<name>template</name>
 				<!-- MVC模版代码根路径 -->
-				<mvcTemplateDir>./template/mybatisplus</mvcTemplateDir>
+				<templateDir>./template/mybatisplus</templateDir>
 				<!-- 只生成指定表的类，不指定默认生成所有表的类 -->
 				<includeTables>
 					<!--<value>t_user</value>-->
@@ -348,7 +378,7 @@ public class AddTimeRangeFieldFeature implements AddFieldFeature {
 根据模版代码自动生成数据库表对应的MVC代码
 
 ```shell
-mvn code-generator:generate-mvc
+mvn code-generator:generate-template
 ```
 
 > 此功能需要自行修改提供的样例MVC模版代码，或者直接使用亦可，样例代码中的包名不能包含example字样。（替换程序硬编码包含example字样）

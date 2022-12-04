@@ -30,8 +30,8 @@ public class EntityMojo extends BaseMojo {
 
         super.runProfile(profile);
 
-        if (!StringUtil.isNullOrEmpty(profile.getMvcTemplateDir())) {
-            getLog().info("已配置mvcTemplateDir, mvcTemplateDir只能在goal: generate-mvc中运行, 因此profile: " + profile.getName() + "将终止执行");
+        if (!StringUtil.isNullOrEmpty(profile.getTemplateDir())) {
+            getLog().info("已配置templateDir, templateDir只能在goal: generate-template中运行, 因此profile: " + profile.getName() + "将终止执行");
             return;
         }
 

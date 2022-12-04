@@ -71,9 +71,9 @@ public class ProfileProperties {
      */
     private String appendPrefix = "";
     /**
-     * MVC模版文件根目录
+     * 模版文件根目录
      */
-    private String mvcTemplateDir = null;
+    private String templateDir = null;
     /**
      * 应用特性
      */

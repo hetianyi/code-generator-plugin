@@ -33,7 +33,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  * @author Jason
  */
 @Slf4j
-@Mojo(name = "generate-mvc", defaultPhase = LifecyclePhase.COMPILE)
+@Mojo(name = "generate-template", defaultPhase = LifecyclePhase.COMPILE)
 public class MvcMojo extends BaseMojo {
 
 
@@ -41,8 +41,8 @@ public class MvcMojo extends BaseMojo {
 
         super.runProfile(profile);
 
-        if (StringUtil.isNullOrEmpty(profile.getMvcTemplateDir())) {
-            getLog().info("未配置mvcTemplateDir, profile: " + profile.getName() + "将终止执行");
+        if (StringUtil.isNullOrEmpty(profile.getTemplateDir())) {
+            getLog().info("未配置templateDir, profile: " + profile.getName() + "将终止执行");
             return;
         }
 
@@ -59,8 +59,8 @@ public class MvcMojo extends BaseMojo {
     private List<File> detectTemplateFile(ProfileProperties profile) throws IOException {
 
         List<File> result = new LinkedList<>();
-        String mvcTemplateDir = profile.getMvcTemplateDir();
-        Path templateRootPath = Paths.get(mvcTemplateDir);
+        String templateDir = profile.getTemplateDir();
+        Path templateRootPath = Paths.get(templateDir);
 
         if (!Files.exists(templateRootPath)) {
             throw new RuntimeException("模版目录不存在: " + templateRootPath);

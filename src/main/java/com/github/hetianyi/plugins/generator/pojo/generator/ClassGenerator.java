@@ -12,6 +12,7 @@ import com.github.hetianyi.boot.ready.common.Const;
 import com.github.hetianyi.boot.ready.common.util.CollectionUtil;
 import com.github.hetianyi.boot.ready.common.util.StringUtil;
 import com.github.hetianyi.plugins.generator.common.InstanceConfig;
+import com.github.hetianyi.plugins.generator.common.Pair;
 import com.github.hetianyi.plugins.generator.common.ProfileProperties;
 import com.github.hetianyi.plugins.generator.common.Slot;
 import com.github.hetianyi.plugins.generator.common.SlotType;
@@ -20,8 +21,11 @@ import com.github.hetianyi.plugins.generator.pojo.entity.TableColumn;
 import com.github.hetianyi.plugins.generator.pojo.entity.TableDefinition;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.Feature;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.PreGenerateFeature;
+import com.github.hetianyi.plugins.generator.pojo.generator.feature.SlotFeature;
+import com.github.hetianyi.plugins.generator.pojo.generator.feature.TypeMappingFeature;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.buildin.ClassCommentFeature;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.buildin.CopyrightFeature;
+import com.github.hetianyi.plugins.generator.pojo.generator.feature.buildin.DefaultTypeMappingFeature;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.buildin.FieldCommentFeature;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.buildin.GetterSetterFeature;
 import com.github.hetianyi.plugins.generator.pojo.generator.feature.buildin.IdField2StringFeature;
@@ -82,6 +86,9 @@ public class ClassGenerator {
     );
 
     private List<Feature> features = new LinkedList<>();
+    private List<SlotFeature> runtimeFeatures = new LinkedList<>();
+
+    private TypeMappingFeature typeFeature = new DefaultTypeMappingFeature();
 
     private static final Map<String, Feature> buildInFeatureMap = new HashMap<String, Feature>() {
         {
@@ -187,7 +194,13 @@ public class ClassGenerator {
             else {
                 try {
                     Object o = InstanceConfig.getClassLoader().loadClass(candidate).newInstance();
-                    features.add((Feature) o);
+                    if (o instanceof SlotFeature) {
+                        runtimeFeatures.add((SlotFeature) o);
+                    } else if (o instanceof TypeMappingFeature) {
+                        typeFeature = (TypeMappingFeature) o;
+                    } else {
+                        features.add((Feature) o);
+                    }
                 }
                 catch (Exception e) {
                     throw new RuntimeException(e);
@@ -201,6 +214,27 @@ public class ClassGenerator {
         this.features.stream()
                      .filter(v -> v instanceof PreGenerateFeature)
                      .forEach(v -> v.apply(this));
+    }
+
+    private void applySlotFeatures(Slot s) {
+        if (runtimeFeatures.isEmpty()) {
+            slots.add(s);
+            return;
+        }
+        runtimeFeatures.forEach(v -> {
+            Slot r = v.resolve(s);
+            if (r != null) {
+                slots.add(r);
+            }
+        });
+    }
+
+    private Pair getTypeFeature(String dbTypeName) {
+        Pair type = typeFeature.getType(dbTypeName);
+        if (null == type) {
+            throw new RuntimeException("无法找到数据库字段类型的Java类型映射：" + dbTypeName + " -> ?");
+        }
+        return type;
     }
 
     // 生成class源代码基本结构
@@ -219,94 +253,94 @@ public class ClassGenerator {
         log.info("解析Class: {}", this.className);
 
         // Java包
-        slots.add(MarkupSlot.of(SlotType.COPYRIGHT_START));
-        slots.add(MarkupSlot.of(SlotType.COPYRIGHT_END));
-        slots.add(MarkupSlot.of(SlotType.PACKAGE_START));
-        slots.add(CodeSlot.of("package ", profile.getPackageName(), ";"));
-        slots.add(EmptyLineSlot.getInstance());
-        slots.add(EmptyLineSlot.getInstance());
-        slots.add(MarkupSlot.of(SlotType.PACKAGE_END));
+        applySlotFeatures(MarkupSlot.of(SlotType.COPYRIGHT_START));
+        applySlotFeatures(MarkupSlot.of(SlotType.COPYRIGHT_END));
+        applySlotFeatures(MarkupSlot.of(SlotType.PACKAGE_START));
+        applySlotFeatures(CodeSlot.of("package ", profile.getPackageName(), ";"));
+        applySlotFeatures(EmptyLineSlot.getInstance());
+        applySlotFeatures(EmptyLineSlot.getInstance());
+        applySlotFeatures(MarkupSlot.of(SlotType.PACKAGE_END));
 
         // Java依赖包导入
-        slots.add(MarkupSlot.of(SlotType.IMPORT_START));
-        slots.add(MarkupSlot.of(SlotType.IMPORT_END));
+        applySlotFeatures(MarkupSlot.of(SlotType.IMPORT_START));
+        applySlotFeatures(MarkupSlot.of(SlotType.IMPORT_END));
 
         // 空行
-        slots.add(EmptyLineSlot.getInstance());
+        applySlotFeatures(EmptyLineSlot.getInstance());
 
         // 类注释
-        slots.add(CodeSlot.of("/**"));
-        slots.add(EmptyLineSlot.getInstance());
-        slots.add(CodeSlot.of(" * "));
-        slots.add(MarkupSlot.of(SlotType.COMMENT_CONTENT_START));
-        slots.add(MarkupSlot.of(SlotType.COMMENT_CONTENT_END));
+        applySlotFeatures(CodeSlot.of("/**"));
+        applySlotFeatures(EmptyLineSlot.getInstance());
+        applySlotFeatures(CodeSlot.of(" * "));
+        applySlotFeatures(MarkupSlot.of(SlotType.COMMENT_CONTENT_START));
+        applySlotFeatures(MarkupSlot.of(SlotType.COMMENT_CONTENT_END));
         if (!StringUtil.isNullOrEmpty(profile.getAuthor())) {
-            slots.add(EmptyLineSlot.getInstance());
-            slots.add(CodeSlot.of(" * "));
-            slots.add(EmptyLineSlot.getInstance());
-            slots.add(CodeSlot.of(" * @author "));
-            slots.add(MarkupSlot.of(SlotType.AUTHOR));
-            slots.add(CodeSlot.of(profile.getAuthor()));
+            applySlotFeatures(EmptyLineSlot.getInstance());
+            applySlotFeatures(CodeSlot.of(" * "));
+            applySlotFeatures(EmptyLineSlot.getInstance());
+            applySlotFeatures(CodeSlot.of(" * @author "));
+            applySlotFeatures(MarkupSlot.of(SlotType.AUTHOR));
+            applySlotFeatures(CodeSlot.of(profile.getAuthor()));
         }
-        slots.add(EmptyLineSlot.getInstance());
-        slots.add(CodeSlot.of(" */"));
-        slots.add(EmptyLineSlot.getInstance());
+        applySlotFeatures(EmptyLineSlot.getInstance());
+        applySlotFeatures(CodeSlot.of(" */"));
+        applySlotFeatures(EmptyLineSlot.getInstance());
 
 
         // Class定义
-        slots.add(MarkupSlot.of(SlotType.CLASS_START).addAttribute("table", this.tabDef));
-        slots.add(CodeSlot.of("public class "));
-        slots.add(MarkupSlot.of(SlotType.CLASS_NAME_START));
-        slots.add(CodeSlot.of(this.className));
-        slots.add(MarkupSlot.of(SlotType.CLASS_NAME_END));
-        slots.add(CodeSlot.of(" "));
-        slots.add(MarkupSlot.of(SlotType.EXTENDS_START));
-        slots.add(MarkupSlot.of(SlotType.EXTENDS_END));
-        slots.add(MarkupSlot.of(SlotType.IMPLEMENTS_START));
-        slots.add(MarkupSlot.of(SlotType.IMPLEMENTS_END));
-        slots.add(CodeSlot.of("{"));
-        slots.add(MarkupSlot.of(SlotType.CLASS_FIRST_LINE));
+        applySlotFeatures(MarkupSlot.of(SlotType.CLASS_START).addAttribute("table", this.tabDef));
+        applySlotFeatures(CodeSlot.of("public class "));
+        applySlotFeatures(MarkupSlot.of(SlotType.CLASS_NAME_START));
+        applySlotFeatures(CodeSlot.of(this.className));
+        applySlotFeatures(MarkupSlot.of(SlotType.CLASS_NAME_END));
+        applySlotFeatures(CodeSlot.of(" "));
+        applySlotFeatures(MarkupSlot.of(SlotType.EXTENDS_START));
+        applySlotFeatures(MarkupSlot.of(SlotType.EXTENDS_END));
+        applySlotFeatures(MarkupSlot.of(SlotType.IMPLEMENTS_START));
+        applySlotFeatures(MarkupSlot.of(SlotType.IMPLEMENTS_END));
+        applySlotFeatures(CodeSlot.of("{"));
+        applySlotFeatures(MarkupSlot.of(SlotType.CLASS_FIRST_LINE));
 
-        slots.add(EmptyLineSlot.getInstance());
+        applySlotFeatures(EmptyLineSlot.getInstance());
 
         // 字段
         List<TableColumn> columns = tabDef.getColumns();
         for (int i = 0; i < columns.size(); i++) {
             TableColumn column = columns.get(i);
-            String type = typeMappings.get(column.getType());
-            if (StringUtil.isNullOrEmpty(type)) {
-                throw new RuntimeException("无法找到数据库字段类型的Java类型映射：" + column.getType() + " -> ?");
-            }
-            slots.add(MarkupSlot.of(SlotType.FIELD_START).addAttribute("column", column));
 
-            slots.add(MarkupSlot.of(SlotType.FIELD_HEAD).addAttribute("column", column));
-            slots.add(IndentSlot.getInstance());
-            slots.add(CodeSlot.of("private "));
-            slots.add(CodeSlot.of(type).addAttribute("column", column));
-            slots.add(CodeSlot.of(" "));
-            slots.add(MarkupSlot.of(SlotType.FIELD_NAME_START));
+            Pair pair = getTypeFeature(column.getType());
+
+            String type = pair.getJavaTypeName();
+            applySlotFeatures(MarkupSlot.of(SlotType.FIELD_START).addAttribute("column", column));
+
+            applySlotFeatures(MarkupSlot.of(SlotType.FIELD_HEAD).addAttribute("column", column));
+            applySlotFeatures(IndentSlot.getInstance());
+            applySlotFeatures(CodeSlot.of("private "));
+            applySlotFeatures(CodeSlot.of(type).addAttribute("column", column));
+            applySlotFeatures(CodeSlot.of(" "));
+            applySlotFeatures(MarkupSlot.of(SlotType.FIELD_NAME_START));
 
             column.setFieldName(GenerateUtil.camel(column.getName(), false));
 
-            slots.add(CodeSlot.of(column.getFieldName()).addTag("fieldName"));
-            slots.add(MarkupSlot.of(SlotType.FIELD_NAME_END));
-            slots.add(CodeSlot.of(";"));
-            slots.add(MarkupSlot.of(SlotType.FIELD_TAIL).addAttribute("column", column));
+            applySlotFeatures(CodeSlot.of(column.getFieldName()).addTag("fieldName"));
+            applySlotFeatures(MarkupSlot.of(SlotType.FIELD_NAME_END));
+            applySlotFeatures(CodeSlot.of(";"));
+            applySlotFeatures(MarkupSlot.of(SlotType.FIELD_TAIL).addAttribute("column", column));
 
             if (i != columns.size() - 1) {
-                slots.add(EmptyLineSlot.getInstance());
+                applySlotFeatures(EmptyLineSlot.getInstance());
             }
-            slots.add(MarkupSlot.of(SlotType.FIELD_END));
-            if (!StringUtil.isNullOrEmpty(importMappings.get(column.getType()))) {
-                imports.add(importMappings.get(column.getType()));
+            applySlotFeatures(MarkupSlot.of(SlotType.FIELD_END));
+            if (!StringUtil.isNullOrEmpty(pair.getImportClass())) {
+                imports.add(pair.getImportClass());
             }
         }
 
-        slots.add(MarkupSlot.of(SlotType.ALL_FIELD_END));
-        slots.add(MarkupSlot.of(SlotType.CLASS_LAST_LINE));
-        slots.add(EmptyLineSlot.getInstance());
-        slots.add(CodeSlot.of("}"));
-        slots.add(MarkupSlot.of(SlotType.CLASS_END));
+        applySlotFeatures(MarkupSlot.of(SlotType.ALL_FIELD_END));
+        applySlotFeatures(MarkupSlot.of(SlotType.CLASS_LAST_LINE));
+        applySlotFeatures(EmptyLineSlot.getInstance());
+        applySlotFeatures(CodeSlot.of("}"));
+        applySlotFeatures(MarkupSlot.of(SlotType.CLASS_END));
         return this;
     }
 
