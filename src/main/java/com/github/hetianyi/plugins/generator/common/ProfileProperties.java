@@ -73,7 +73,7 @@ public class ProfileProperties {
     /**
      * 模版文件根目录
      */
-    private String templateDir = null;
+    private Set<String> templateDirs = ImmutableSet.of();
     /**
      * 应用特性
      */

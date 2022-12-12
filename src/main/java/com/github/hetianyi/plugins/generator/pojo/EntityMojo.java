@@ -9,11 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.github.hetianyi.boot.ready.common.util.CollectionUtil;
 import com.github.hetianyi.boot.ready.common.util.StringUtil;
 import com.github.hetianyi.plugins.generator.common.BaseMojo;
 import com.github.hetianyi.plugins.generator.common.ProfileProperties;
 import com.github.hetianyi.plugins.generator.common.util.GenerateUtil;
 import com.github.hetianyi.plugins.generator.pojo.generator.ClassGenerator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
@@ -23,6 +25,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  *
  * @author Jason
  */
+@Slf4j
 @Mojo(name = "generate-pojo", defaultPhase = LifecyclePhase.COMPILE)
 public class EntityMojo extends BaseMojo {
 
@@ -30,7 +33,9 @@ public class EntityMojo extends BaseMojo {
 
         super.runProfile(profile);
 
-        if (!StringUtil.isNullOrEmpty(profile.getTemplateDir())) {
+        log.info("运行插件：generate-pojo");
+
+        if (!CollectionUtil.isNullOrEmpty(profile.getTemplateDirs())) {
             getLog().info("已配置templateDir, templateDir只能在goal: generate-template中运行, 因此profile: " + profile.getName() + "将终止执行");
             return;
         }

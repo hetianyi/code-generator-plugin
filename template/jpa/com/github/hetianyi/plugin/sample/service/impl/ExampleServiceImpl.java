@@ -1,4 +1,4 @@
-// #MvcTemplate#
+// #__Template__#
 package com.github.hetianyi.plugin.sample.service.impl;
 
 import java.util.Date;

@@ -1,4 +1,4 @@
-// #MvcTemplate#
+// #__Template__#
 package com.github.hetianyi.plugin.sample.controller;
 
 import javax.annotation.Resource;

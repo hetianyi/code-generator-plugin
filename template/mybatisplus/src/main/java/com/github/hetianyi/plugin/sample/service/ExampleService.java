@@ -1,4 +1,4 @@
-// #MvcTemplate#
+// #__Template__#
 package com.github.hetianyi.plugin.sample.service;
 
 import com.github.hetianyi.plugin.sample.model.form.CreateExampleForm;

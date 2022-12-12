@@ -1,4 +1,4 @@
-package com.github.hetianyi.plugins.generator.mvc;
+package com.github.hetianyi.plugins.generator.template;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 import cn.hutool.core.io.FileUtil;
+import com.github.hetianyi.boot.ready.common.Const;
+import com.github.hetianyi.boot.ready.common.util.CollectionUtil;
 import com.github.hetianyi.boot.ready.common.util.StringUtil;
 import com.github.hetianyi.plugins.generator.common.BaseMojo;
 import com.github.hetianyi.plugins.generator.common.ProfileProperties;
@@ -34,14 +37,17 @@ import org.apache.maven.plugins.annotations.Mojo;
  */
 @Slf4j
 @Mojo(name = "generate-template", defaultPhase = LifecyclePhase.COMPILE)
-public class MvcMojo extends BaseMojo {
+public class TemplateMojo extends BaseMojo {
 
-
+    @Override
     protected void runProfile(ProfileProperties profile) throws Exception {
 
         super.runProfile(profile);
 
-        if (StringUtil.isNullOrEmpty(profile.getTemplateDir())) {
+        log.info("运行插件：generate-template");
+
+
+        if (CollectionUtil.isNullOrEmpty(profile.getTemplateDirs())) {
             getLog().info("未配置templateDir, profile: " + profile.getName() + "将终止执行");
             return;
         }
@@ -56,30 +62,38 @@ public class MvcMojo extends BaseMojo {
     }
 
 
-    private List<File> detectTemplateFile(ProfileProperties profile) throws IOException {
+    private List<File> detectTemplateFile(ProfileProperties profile) {
 
         List<File> result = new LinkedList<>();
-        String templateDir = profile.getTemplateDir();
-        Path templateRootPath = Paths.get(templateDir);
+        Set<String> templateDirs = profile.getTemplateDirs();
 
-        if (!Files.exists(templateRootPath)) {
-            throw new RuntimeException("模版目录不存在: " + templateRootPath);
-        }
-        log.debug("遍历目录：" + templateRootPath);
-        Files.walk(templateRootPath).forEach(v -> {
-            File file = v.toFile();
-            if (file.isDirectory()) {
+        templateDirs.stream().filter(v -> !StringUtil.isNullOrEmptyTrimed(v)).forEach(templateDir -> {
+            Path templateRootPath = new File(templateDir).toPath();
+
+            if (!Files.exists(templateRootPath)) {
+                throw new RuntimeException("模版目录不存在: " + templateRootPath);
             }
-            else {
-                // System.out.println("文件 -> " + v.toFile().getAbsolutePath());
-                String content = FileUtil.readUtf8String(file);
-                // System.out.println("文件内容 -> " + content);
-                for (Map.Entry<TemplateType, String> entry : TemplateConfig.templateCommentMarker.entrySet()) {
-                    if (content.contains(entry.getValue())) {
-                        result.add(file);
-                        log.debug("模版文件 -> " + v.toFile().getAbsolutePath());
+            log.debug("遍历目录：" + templateRootPath);
+            try {
+                Files.walk(templateRootPath).forEach(v -> {
+                    File file = v.toFile();
+                    if (file.isDirectory()) {
                     }
-                }
+                    else {
+                        //System.out.println("文件 -> " + v.toFile().getAbsolutePath());
+                        String content = FileUtil.readUtf8String(file);
+                        // System.out.println("文件内容 -> " + content);
+                        for (Map.Entry<TemplateType, String> entry : TemplateConfig.templateCommentMarker.entrySet()) {
+                            if (content.contains(entry.getValue())) {
+                                result.add(file);
+                                log.debug("模版文件 -> " + v.toFile().getAbsolutePath());
+                            }
+                        }
+                    }
+                });
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
 

@@ -37,8 +37,6 @@ public abstract class BaseMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
-        log.info("运行插件：generate-pojo");
-
         configureDefaultValue();
 
         printConfig();
@@ -84,6 +82,7 @@ public abstract class BaseMojo extends AbstractMojo {
         log.debug("dbConfig=" + Const.GSON.toJson(database));
         log.debug("activeProfiles=" + Const.GSON.toJson(activeProfiles));
         log.debug("profiles=" + Const.GSON.toJson(profiles));
+        log.debug("当前目录=" + project.getBasedir());
     }
 
     private void connectMysqlDB() throws MojoFailureException {
