@@ -11,6 +11,7 @@ import cn.hutool.db.Db;
 import com.github.hetianyi.boot.ready.common.Const;
 import com.github.hetianyi.boot.ready.common.util.CollectionUtil;
 import com.mysql.cj.jdbc.MysqlDataSource;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -23,6 +24,7 @@ import org.postgresql.ds.PGSimpleDataSource;
  * @author Jason He
  */
 @Slf4j
+@Data
 public abstract class BaseMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}")
@@ -35,7 +37,7 @@ public abstract class BaseMojo extends AbstractMojo {
     private List<ProfileProperties> profiles;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoFailureException {
 
         configureDefaultValue();
 
