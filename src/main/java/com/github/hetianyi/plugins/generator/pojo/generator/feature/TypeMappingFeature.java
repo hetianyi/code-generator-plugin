@@ -22,8 +22,4 @@ public interface TypeMappingFeature extends Feature {
         }
         return new Pair(type, "");
     }
-
-    @Override
-    default void apply(ClassGenerator generator) {
-    }
 }
