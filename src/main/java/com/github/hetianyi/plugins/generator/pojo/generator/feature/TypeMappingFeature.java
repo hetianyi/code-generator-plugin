@@ -15,7 +15,7 @@ import static com.github.hetianyi.plugins.generator.common.JavaTypeMapping.typeM
  */
 public interface TypeMappingFeature extends Feature {
 
-    default Pair getType(String dbTypeName) {
+    default Pair getType(String dbTypeName, String columnName) {
         String type = typeMappings.get(dbTypeName);
         if (!StringUtil.isNullOrEmpty(importMappings.get(dbTypeName))) {
             return new Pair(type, importMappings.get(dbTypeName));

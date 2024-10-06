@@ -229,8 +229,8 @@ public class ClassGenerator {
         });
     }
 
-    private Pair getTypeFeature(String dbTypeName) {
-        Pair type = typeFeature.getType(dbTypeName);
+    private Pair getTypeFeature(String dbTypeName, String columnName) {
+        Pair type = typeFeature.getType(dbTypeName, columnName);
         if (null == type) {
             throw new RuntimeException("无法找到数据库字段类型的Java类型映射：" + dbTypeName + " -> ?");
         }
@@ -308,7 +308,7 @@ public class ClassGenerator {
         for (int i = 0; i < columns.size(); i++) {
             TableColumn column = columns.get(i);
 
-            Pair pair = getTypeFeature(column.getType());
+            Pair pair = getTypeFeature(column.getType(), column.getName());
 
             String type = pair.getJavaTypeName();
             applySlotFeatures(MarkupSlot.of(SlotType.FIELD_START).addAttribute("column", column));
